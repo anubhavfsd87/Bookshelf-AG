@@ -4,21 +4,18 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User.js"); 
-const Book = require("./models/Books.js");  
+const Book = require("./models/Book.js");  
 const Booking = require("./models/Booking.js")
 const cookieParser = require("cookie-parser");
 const imageDownloader = require('image-downloader');
-const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const fs = require('fs');
-const mime = require('mime-types'); 
 
 require('dotenv').config();
 const app = express();
 
 const bcryptSalt = bcrypt.genSaltSync(10);  
 const jwtSecret = 'bjshjb98734bkhbso8rbhjk87vhb';
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -30,40 +27,19 @@ app.use(cors({
 
 mongoose.connect(process.env.MONGO_URL);
 
-async function uploadToS3(path, originalFilename, mimetype) {
-    const client = new S3Client({
-      region: 'us-east-1',
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      },
-    });
-    const parts = originalFilename.split('.');
-    const ext = parts[parts.length - 1];
-    const newFilename = Date.now() + '.' + ext;
-    await client.send(new PutObjectCommand({
-      Bucket: bucket,
-      Body: fs.readFileSync(path),
-      Key: newFilename,
-      ContentType: mimetype,
-      ACL: 'public-read',
-    }));
-    return `https://${bucket}.s3.amazonaws.com/${newFilename}`;
-}
-
-
 function getUserDataFromReq(req) {
     return new Promise((resolve, reject) => {
-      jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
-        if (err) throw err;
-        resolve(userData);
-      });
+        jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
+            if (err) throw err;
+            resolve(userData);
+        });
     });
-  }
+} 
 
 app.get('/test', (req,res) => {
     res.json('test ok');
 }); 
+
 
 app.post('/register', async (req,res) => {
     const {name,email,password} = req.body;
@@ -106,7 +82,7 @@ app.get('/profile', (req,res) => {
     if (token) {
         jwt.verify(token, jwtSecret, {}, async (err, userData) => {
             if (err) throw err;
-            const {name,email,_id} = await User.findById(userData.id);
+            const {name,email,_id} = await User.findByIdAndUpdate(userData.id);
             res.json({name,email,_id});
         });
     } else {
@@ -130,8 +106,8 @@ app.post('/upload-by-link', async (req,res) => {
     res.json(url);
 });
 
-const photosMiddleware = multer({dest:'uploads/'});
-app.post('/upload', photosMiddleware.array('photos', 100), (req,res) => {
+const photosMiddleware = multer({dest:'/temp'});
+app.post('/upload', photosMiddleware.array('photos', 100), async (req,res) => {
     const uploadedFiles = [];
     for (let i = 0; i < req.files.length; i++) {
         const {path, originalname} = req.files[i];
@@ -139,7 +115,8 @@ app.post('/upload', photosMiddleware.array('photos', 100), (req,res) => {
         const ext = parts[parts.length - 1];
         const newPath = path + '.' + ext;
         fs.renameSync(path, newPath);
-        uploadedFiles.push(newPath.replace('uploads/',''));
+        uploadedFiles.push(newPath.replace('upload/',''));
+        uploadedFiles.push(url);
     }
     res.json(uploadedFiles);
 });
@@ -148,14 +125,14 @@ app.post('/Books', (req,res) => {
     const {token} = req.cookies;
     const {
         title,isbn,numberOfPages,addedPhotos,description,price,
-        perks,extraInfo,secureCheckIn,secureCheckout
+        perks,extraInfo,secureCheckIn,secureCheckout,
     } = req.body;
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
         if (err) throw err;
         const bookDoc = await Book.create({
             owner:userData.id,price,
             title,isbn,numberOfPages,photos:addedPhotos,description,
-            perks,extraInfo,secureCheckIn,secureCheckout
+            perks,extraInfo,secureCheckIn,secureCheckout,
         });
         res.json(bookDoc);
     });
@@ -163,18 +140,18 @@ app.post('/Books', (req,res) => {
 
 app.get('/user-Books', (req,res) => {
     const {token} = req.cookies;
-    jwt.verify(token, jwtSecret, {}, async(err, userData) => {
+    jwt.verify(token, jwtSecret, {}, async(_err, userData) => {
         const {id} = userData;
         res.json (await Book.find({owner:id}) );
     });
 });
 
-app.get('/books/:id', async (req,res) => {
+app.get('/Bookks/:id', async (req,res) => {
     const {id} = req.params;
     res.json(await Book.findById(id));
 });
 
-app.put('/Books', async (req,res) => {
+app.put('/Bookks', async (req,res) => {
     const {token} = req.cookies;
     const {
         id, title,isbn,numberOfPages,addedPhotos,description,
@@ -186,7 +163,7 @@ app.put('/Books', async (req,res) => {
         if (userData.id === bookDoc.owner.toString()) {
             bookDoc.set({
                 title,isbn,numberOfPages,photos:addedPhotos,description,
-                perks,extraInfo,secureCheckIn,secureCheckout, price,
+                perks,extraInfo,secureCheckIn,secureCheckout,price,
             });
             await bookDoc.save();
             res.json('ok');
@@ -194,17 +171,17 @@ app.put('/Books', async (req,res) => {
     });
 });
 
-app.get('/Books', async (req,res) => {
+app.get('/Bookks', async (req,res) => {
     res.json( await Book.find() );
 });
 
 app.post('/bookings', async (req, res) => {
     const userData = await getUserDataFromReq(req);
     const {
-      book,checkIn,checkOut,numberOfBooks,name,phone,price,
+      book,checkIn,checkOut,numberOfBooks,name,email,price,title,
     } = req.body;
     Booking.create({
-      book,checkIn,checkOut,numberOfBooks,name,phone,price,
+      book,checkIn,checkOut,numberOfBooks,name,email,price,title,
       user:userData.id,
     }).then((doc) => {
       res.json(doc);
@@ -213,9 +190,9 @@ app.post('/bookings', async (req, res) => {
     });
 });
 
-app.get('/bookings', async (req,res) => {
+app.get('/bookings',  async (req,res) => {
     const userData = await getUserDataFromReq(req);
-    res.json( await Booking.find({user:userData.id}).populate('book') );
+    res.json( await Booking.find({user:userData.id}).populate('Books'));
 });
 
 

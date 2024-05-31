@@ -8,6 +8,12 @@ export default {
     extend: {
       colors: {
         primary: '#F5385D',
+        socialBg:'#F5F7FB',
+        socialBlue: '#218DFA',
+        lightblack: '#d3e9ff',
+        gold: '#FFFF7A',
+        Rosewood: '#660011',
+        hex: '#0000df'
       }
     },
   },

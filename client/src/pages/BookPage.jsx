@@ -5,47 +5,44 @@ import BookingWidget from "../BookingWidget";
 import BookGallery from "../BookGallery";
 import AddressLink from "../AddressLink";
 
-
-
 export default function BookPage() {
-    const {id} = useParams();
+    const {id} = useParams(); 
     const [book, setBook] = useState(null);
-
     useEffect(() => {
         if (!id) {
             return;
         }
-        axios.get(`/Books/${id}`).then(response => {
-            setBook(response.data);
+        axios.get(`/Bookks/${id}`).then(response => {
+            setBook(response.data); 
         });
     }, [id]);
 
     if (!book) return '';
 
     return (
-        <div className="mt-4 bg-gray-100 -mx-8 px-8 py-8">
-            <h1 className="text-3xl">{book.title}</h1>
-            <AddressLink>{book.address}</AddressLink>
+        <div className="p-2text-6xl mt-4 bg-gray-100 -mx-8 px-8 py-8 text-white bg-capitalize">
+            <h1 className="text-6xl bg-black text-center">{book.title}</h1>
+            <AddressLink>{book.address} ASIA </AddressLink>
             <BookGallery book={book} />
-            <a className="my-2 block font-semibold underline" target="_blank" href={'https://maps.google.com/?q='+book.address} rel="noreferrer">{book.address}</a>
-            <div className="mt-8 mb-8 grid gap-2 grid gap-8 grid-cols-1 md:grid-cols-[2fr_1fr]">
-                <div>
-                    <div className="my-4">
-                     <h2 className="font-semibold text-2xl">Description</h2>
+     
+            <div className="text-2xl p-2 mt-8 mb-8 grid gap-2 grid gap-8 bg-black text-primary gap-2 grid-cols-1 md:grid-cols-[2fr_1fr]">
+                <div className="text-black">
+                    <div className="my-4 text-white">
+                     <h2 className="font-semibold text-2xl text-primary">Description</h2>
                      {book.description}
                     </div>
-                    Check-in: {book.checkIn}<br />
-                    Check-out: {book.checkOut}<br />
+                    CheckIn: {book.checkIn}<br />
+                    CheckOut: {book.checkOut}<br />
                 </div>
-                <div>
+                <div className="bg-primary">
                   <BookingWidget book={book} />
                 </div>
             </div> 
-            <div className="bg-white -mx-8 px-8 py-8 border-t">
+            <div className="bg-black text-primary -mx-8 px-8 py-8 border-t">
                 <div>
                  <h2 className="font-semibold text-2xl">Extra info</h2>
                 </div>
-                <div className="mb-4 mt-2 text-sm text-gray-700 leading-5">{book.extraInfo}</div>
+                <div className="mb-4 mt-2 text-white text-md text-gray-700 leading-5">{book.extraInfo}</div>
              </div>   
         </div>
     );

@@ -20,6 +20,13 @@ module.exports = {
   },
   rules: {
     'react/jsx-key': [1, { checkFragmentShorthand: true }],
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    'react/jsx-key': [1, { checkFragmentShorthand: true }],
+    
+    "compilerOptions": {
+      "jsx": "react"
+    }
+
+
   }
 }
