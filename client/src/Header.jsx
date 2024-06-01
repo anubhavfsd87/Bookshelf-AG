@@ -21,7 +21,7 @@ export default function Header(){
             <span className="flex flex-c -p-3 font-bold text-3xl object-cover mr-9 border-cover w-9">BOOKSHELF</span>
           </Link> 
           <br />
-          <div className="flex-c text-4xl">
+          <div className="flex ml-20 p-2">
             <Row>  
               <Col xs={9} md={9} xl={9}>
                 <TrackVisibility>
