@@ -32,11 +32,11 @@ export default function LoginPage() {
   }
     
   return (
-    <div className="mt-7 flex grow items-center justify-around p-4 mr-8">
+    <div className="mt-7 flex grow items-center justify-around p-4 mr-1">
       <div className="mb-64 mt-74 mr-9 p-9 bg-lightblack rounded-3xl mt-3 py-7">
         <br/>
-        <h1 className="text-5xl bg-black p-2 text-white items-center text-center ml-6 mb-5 mt-3 mr-9">LOGIN</h1>
-        <form className="max-w-md mx-auto mt-9 ml-4 bg-lightblack" onSubmit={handleLoginSubmit}>
+        <h1 className="text-5xl bg-black p-2 text-white items-center text-center ml-8 mb-5 mt-3 mr-9">LOGIN</h1>
+        <form className="max-w-md mx-auto mt-2 ml-4 bg-lightblack" onSubmit={handleLoginSubmit}>
           <input type="email" 
             placeholder='your@email.com' 
             value={email}
@@ -45,11 +45,11 @@ export default function LoginPage() {
             placeholder="password" 
             value={password}
             onChange={ev => setPassword(ev.target.value)}/>
-          <button className="primary mt-1">Login</button>
-          <div className="text-center text-white py-2 text-gray-500 gap-2 bg-black mt-2">
+          <button className="primary mt-3 text-2xl">Login</button>
+          <div className="text-center text-white py-2 text-gray-500 gap-2 bg-black mt-4">
             Do not have a account yet? <Link className ="underline text" to={'/register'}>Register now</Link>
           </div>
-            <div>
+            <div className="mt-3">
               {!profile ? (
                 <LoginSocialFacebook
                     appId="1502734373985633"
