@@ -8,7 +8,6 @@ const bookingSchema = new mongoose.Schema({
   checkOut: {type:Date, required:true},
   name: {type:String, required:true},
   email: {type:String, required:true},
-  title: {type:String, required:true},
   price: Number,
   Books: Number
 });
